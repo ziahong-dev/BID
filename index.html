@@ -83,18 +83,46 @@ body{
   font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-align:right;line-height:1.7}
 
 /* ---------- progress ---------- */
-.progress-wrap{margin-bottom:24px}
-.steptag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);
-  letter-spacing:.04em;margin-bottom:9px;display:flex;justify-content:space-between;align-items:baseline}
-.steptag .nm{color:var(--ink-2);font-weight:600;letter-spacing:.02em}
-.progress{display:flex;gap:6px}
-.progress .seg{flex:1;height:4px;border-radius:4px;background:var(--bg-2);
-  overflow:hidden;position:relative}
-.progress .seg::after{content:"";position:absolute;inset:0;background:var(--accent);
-  border-radius:4px;transform:scaleX(0);transform-origin:left;
-  transition:transform .45s cubic-bezier(.4,0,.1,1)}
-.progress .seg.done::after{transform:scaleX(1)}
-.progress .seg.cur::after{transform:scaleX(.5)}
+.progress{
+  display:flex;
+  gap:6px;
+  height:4px;
+  align-items:flex-start;
+}
+
+.progress .seg{
+  flex:1;
+  height:4px !important;
+  min-height:4px !important;
+  max-height:4px !important;
+  border-radius:4px;
+  background:var(--bg-2);
+  overflow:hidden;
+  position:relative;
+}
+
+.progress .seg::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:auto;
+  width:100%;
+  height:4px !important;
+  background:var(--accent);
+  border-radius:4px;
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .45s cubic-bezier(.4,0,.1,1);
+}
+
+.progress .seg.done::after{
+  transform:scaleX(1);
+}
+
+.progress .seg.cur::after{
+  transform:scaleX(.5);
+}
 
 /* ---------- cards / questions ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
