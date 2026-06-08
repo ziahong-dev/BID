@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<!--
+  버스정보디스플레이(BID) 이용자 인식 조사 — 데이터 수집 사이트
+  연세대학교 시각/통합 디자인 연구실 · 모던/프로페셔널 리디자인 v2
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --ink:#14161b;
+  --ink-2:#474c56;
+  --ink-3:#878d99;
+  --line:#e9eaee;
+  --line-2:#dcdee4;
+  --bg:#f4f5f7;
+  --bg-2:#eceef1;
+  --card:#ffffff;
+  --brand:#15171d;          /* deep charcoal header */
+  --brand-2:#21242d;
+  --amber:#f0a830;          /* transit/LED heritage accent (used sparingly) */
+  --accent:#2160e6;         /* interaction blue */
+  --accent-ink:#1a4fc4;
+  --accent-soft:#eef3fe;
+  --accent-line:#cfe0fb;
+  --ok:#1c8a4e;
+  --ok-soft:#e6f5ec;
+  --warn:#cf3b2e;
+  --r:16px;
+  --r-sm:11px;
+  --maxw:660px;
+  --shadow:0 1px 2px rgba(20,22,27,.04), 0 8px 24px -16px rgba(20,22,27,.18);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'IBM Plex Sans KR',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  font-size:16px;
+  letter-spacing:-.011em;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px 96px}
+
+/* ---------- header ---------- */
+.board{
+  background:var(--brand);
+  background-image:linear-gradient(180deg,var(--brand-2),var(--brand));
+  border-radius:0 0 var(--r) var(--r);
+  padding:26px 26px 24px;
+  margin:0 -20px 28px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 14px 40px -24px rgba(0,0,0,.6);
+}
+.board::before{   /* thin amber heritage rule */
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--amber),#f6c35e 55%,transparent);
+}
+.board .tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;
+  color:#9aa1ae;text-transform:uppercase;display:flex;align-items:center;gap:9px;
+}
+.board .tag .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);
+  box-shadow:0 0 0 3px rgba(240,168,48,.16)}
+.board h1{
+  font-weight:600;color:#fff;font-size:21px;margin-top:13px;line-height:1.4;
+  letter-spacing:-.02em;max-width:30ch;
+}
+.board h1 .en{display:block;color:#868d9b;font-size:12.5px;font-weight:400;
+  margin-top:7px;letter-spacing:0}
+.board .lab{position:absolute;right:24px;bottom:22px;color:#565c68;font-size:9.5px;
+  font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-align:right;line-height:1.7}
+
+/* ---------- progress ---------- */
+.progress-wrap{margin-bottom:24px}
+.steptag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);
+  letter-spacing:.04em;margin-bottom:9px;display:flex;justify-content:space-between;align-items:baseline}
+.steptag .nm{color:var(--ink-2);font-weight:600;letter-spacing:.02em}
+.progress{display:flex;gap:6px}
+.progress .seg{flex:1;height:4px;border-radius:4px;background:var(--bg-2);
+  overflow:hidden;position:relative}
+.progress .seg::after{content:"";position:absolute;inset:0;background:var(--accent);
+  border-radius:4px;transform:scaleX(0);transform-origin:left;
+  transition:transform .45s cubic-bezier(.4,0,.1,1)}
+.progress .seg.done::after{transform:scaleX(1)}
+.progress .seg.cur::after{transform:scaleX(.5)}
+
+/* ---------- cards / questions ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:28px 26px;box-shadow:var(--shadow)}
+section[data-step]{animation:cardIn .42s cubic-bezier(.22,.61,.36,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){section[data-step]{animation:none}}
+
+.sectitle{display:flex;align-items:baseline;gap:9px;margin-bottom:4px}
+.sectitle .ix{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;
+  color:var(--amber);background:rgba(240,168,48,.12);padding:2px 8px;border-radius:6px;
+  letter-spacing:.04em}
+.sectitle .nm{font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-.01em}
+.sectitle .en{color:var(--ink-3);font-weight:400;font-size:12.5px}
+
+.q{padding:24px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:8px}
+.q .qhead{display:flex;gap:10px;margin-bottom:15px}
+.q .qno{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);
+  font-size:13px;flex:none;padding-top:3px;letter-spacing:.02em}
+.q .qtext{font-weight:600;font-size:16.5px;line-height:1.5;letter-spacing:-.012em}
+.q .qtext .en{display:block;font-weight:400;font-size:13px;color:var(--ink-3);margin-top:4px;letter-spacing:0}
+.q .qhint{font-size:12.5px;color:var(--ink-3);margin:-8px 0 14px 26px}
+
+/* option buttons */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opts.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.optgroup{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;
+  letter-spacing:.06em;color:var(--ink-2);margin:8px 0 0;display:flex;align-items:center;gap:10px}
+.optgroup::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.optgroup:first-child{margin-top:0}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:#fff;border:1.5px solid var(--line-2);border-radius:var(--r-sm);
+  padding:13px 15px;cursor:pointer;font:inherit;color:var(--ink);
+  transition:border-color .14s,background .14s,box-shadow .14s,transform .06s;line-height:1.35}
+.opt:hover{border-color:#aeb4c0;background:#fcfcfd}
+.opt:active{transform:scale(.992)}
+.opt .mark{flex:none;width:21px;height:21px;border:2px solid var(--line-2);
+  display:grid;place-items:center;transition:.14s}
+.opt[data-shape=radio] .mark{border-radius:50%}
+.opt[data-shape=check] .mark{border-radius:6px}
+.opt .mark svg{width:12px;height:12px;opacity:0;transform:scale(.4);transition:.14s}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft);
+  box-shadow:0 0 0 3px rgba(33,96,230,.08)}
+.opt.sel .mark{border-color:var(--accent);background:var(--accent)}
+.opt.sel .mark svg{opacity:1;transform:scale(1);stroke:#fff}
+.opt .otxt{font-size:12.5px;color:var(--ink-3)}
+.opt .otxt b{color:var(--ink);font-weight:600}
+.opt.disabled{opacity:.4;pointer-events:none}
+
+.otherbox{margin-top:9px;display:none}
+.otherbox.on{display:block}
+input.txt,textarea.txt{width:100%;font:inherit;border:1.5px solid var(--line-2);
+  border-radius:var(--r-sm);padding:12px 14px;background:#fff;color:var(--ink);resize:vertical;
+  transition:border-color .14s,box-shadow .14s}
+input.txt:focus,textarea.txt:focus{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(33,96,230,.1)}
+textarea.txt{min-height:92px;line-height:1.6}
+.charcount{text-align:right;font-size:11px;color:var(--ink-3);margin-top:4px;font-family:'IBM Plex Mono',monospace}
+
+.counter{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:4px 12px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:7px;margin-bottom:13px;
+  border:1px solid var(--accent-line);transition:.18s}
+.counter::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.counter.full{color:var(--ok);background:var(--ok-soft);border-color:#bfe6cc}
+.counter.full::before{background:var(--ok)}
+
+/* ranking */
+.rank{display:flex;flex-direction:column;gap:9px}
+.rank .empty{font-size:13px;color:var(--ink-3);padding:18px;text-align:center;
+  border:1.5px dashed var(--line-2);border-radius:var(--r-sm);background:var(--bg)}
+.rankrow{display:flex;align-items:center;gap:13px;background:#fff;
+  border:1.5px solid var(--line-2);border-radius:var(--r-sm);padding:11px 13px;
+  transition:border-color .14s,box-shadow .14s}
+.rankrow .num{flex:none;width:32px;height:32px;border-radius:9px;
+  background:var(--accent);color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:600;
+  display:grid;place-items:center;font-size:14px}
+.rankrow:first-child .num{background:var(--amber);color:#3a2a08}
+.rankrow .lbl{flex:1;font-size:14.5px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.rankrow .lbl .en{display:block;font-size:11px;color:var(--ink-3);font-weight:400}
+.rankrow .arrows{display:flex;flex-direction:column;gap:4px}
+.rankrow .arrows button{width:32px;height:22px;border:1px solid var(--line-2);background:#fafbfc;
+  border-radius:6px;cursor:pointer;display:grid;place-items:center;color:var(--ink-2);transition:.12s}
+.rankrow .arrows button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.rankrow .arrows button:disabled{opacity:.3;cursor:default}
+.rankrow .arrows svg{width:12px;height:12px}
+
+/* nav */
+.nav{display:flex;gap:11px;margin-top:26px}
+.btn{font:inherit;font-weight:600;border-radius:var(--r-sm);padding:15px 22px;cursor:pointer;
+  border:1.5px solid transparent;transition:.14s;font-size:15.5px;letter-spacing:-.01em}
+.btn.primary{background:var(--accent);color:#fff;flex:1;
+  box-shadow:0 1px 2px rgba(33,96,230,.25),0 8px 18px -10px rgba(33,96,230,.5)}
+.btn.primary:hover{background:var(--accent-ink)}
+.btn.ghost{background:#fff;border-color:var(--line-2);color:var(--ink-2)}
+.btn.ghost:hover{border-color:var(--ink-3);background:#fcfcfd}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.full{width:100%}
+
+.err{color:var(--warn);font-size:13px;margin-top:14px;display:none;font-weight:500;
+  background:#fdeceb;border:1px solid #f4c9c4;border-radius:10px;padding:11px 14px}
+.err.on{display:block;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* intro */
+.intro p{margin-bottom:14px;font-size:15px;color:var(--ink-2);letter-spacing:-.01em}
+.intro .notice{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:16px 18px;font-size:13.5px;color:var(--ink-2);margin:18px 0}
+.intro .notice b{color:var(--ink)}
+.intro .meta{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px}
+.intro .meta .chip{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-2);
+  background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:6px 13px;
+  display:inline-flex;align-items:center;gap:6px}
+.intro .meta .chip svg{width:13px;height:13px;color:var(--accent)}
+.defs{font-size:13.5px;color:var(--ink-2);background:var(--accent-soft);
+  border:1px solid var(--accent-line);border-radius:var(--r-sm);padding:15px 17px;margin:16px 0;line-height:1.65}
+.defs b{color:var(--accent-ink)}
+.defs .en{color:var(--ink-3);font-size:12.5px}
+.intro .start{margin-top:22px}
+
+/* thank you */
+.done{text-align:center;padding:34px 12px}
+.done .ic{width:66px;height:66px;border-radius:50%;background:var(--ok-soft);color:var(--ok);
+  display:grid;place-items:center;margin:0 auto 20px}
+.done h2{font-size:21px;margin-bottom:10px;letter-spacing:-.02em}
+.done p{color:var(--ink-2);font-size:14.5px;margin-bottom:7px;max-width:46ch;margin-left:auto;margin-right:auto}
+.done .en{color:var(--ink-3);font-size:12.5px}
+
+/* researcher link + modal */
+.reslink{display:none}  /* 연구자용 버튼 숨김 — 단축키(Ctrl/⌘+Shift+R)로 접근 */
+.reslink.show{display:block;text-align:center;margin-top:28px}
+.reslink button{background:none;border:none;color:var(--ink-3);font:inherit;font-size:12px;
+  cursor:pointer;letter-spacing:.01em;display:inline-flex;align-items:center;gap:6px;padding:6px}
+.reslink button:hover{color:var(--ink-2)}
+.reslink svg{width:13px;height:13px}
+.modal{position:fixed;inset:0;background:rgba(12,14,18,.55);display:none;z-index:50;
+  align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;
+  backdrop-filter:blur(2px)}
+.modal.on{display:flex}
+.sheet{background:var(--card);border-radius:var(--r);max-width:760px;width:100%;padding:24px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.4)}
+.sheet h3{font-size:18px;margin-bottom:4px;letter-spacing:-.01em}
+.sheet .sub{font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
+.statline{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 16px;flex:1;min-width:120px}
+.stat .n{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--accent)}
+.stat .k{font-size:11px;color:var(--ink-3)}
+.tablewrap{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:16px}
+table{border-collapse:collapse;width:100%;font-size:11.5px}
+th,td{border-bottom:1px solid var(--line);padding:7px 9px;text-align:left;white-space:nowrap}
+th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.resbtns{display:flex;gap:9px;flex-wrap:wrap}
+.resbtns .btn{flex:1;min-width:130px;padding:12px 15px;font-size:14px}
+.danger{color:var(--warn);border-color:#e8b4ad!important}
+.flag{background:#fff8ec;border:1px solid #f0d9a6;border-radius:var(--r-sm);padding:12px 14px;
+  font-size:12px;color:#7a5a14;margin-top:16px;line-height:1.6}
+
+@media(max-width:480px){
+  .wrap{padding:0 16px 90px}
+  .board{margin:0 -16px 26px;padding:24px 22px 22px}
+  .opts.grid2{grid-template-columns:1fr}
+  .board h1{font-size:19px}
+  .card{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="board">
+    <div class="tag"><span class="dot"></span>연세대학교 시각·통합 디자인 연구실</div>
+    <h1>버스 정보 안내 단말기 내 디스플레이 (BID) 정보 구성에 대한 이용자 인식 조사</h1>
+  </div>
+
+  <!-- progress -->
+  <div class="progress-wrap" id="progressArea" style="display:none">
+    <div class="steptag"><span class="nm" id="stepName"></span><span id="stepCount"></span></div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- ===== STEP 0 : INTRO ===== -->
+  <section class="card intro" data-step="0">
+    <p>안녕하세요. <b>연세대학교 시각/통합 디자인 연구실</b>입니다.</p>
+    <p>먼저, 귀한 시간 내어 설문에 참여해 주셔서 감사합니다.</p>
+    <p>본 설문은 버스정류장에 위치한 <b>버스정보디스플레이(BID)</b> 내 표시되는 정보가 이용자에게 어떻게 인식되고 활용되는지를 파악하기 위한 학술 연구 목적으로 진행됩니다.</p>
+    <div class="defs">
+      본 설문에서 말하는 <b>버스정보디스플레이(BID)</b>는 버스정류장에 설치되어 버스 번호, 도착 예정 시간, 곧 도착 여부, 혼잡도, 운행 지연 정보 등을 제공하는 실시간 정보 표시 장치를 의미합니다.
+    </div>
+    <div class="meta">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>약 5분 소요</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5z"/></svg>익명 처리</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>연구 목적 전용</span>
+    </div>
+    <div class="notice">
+      설문 응답에는 약 <b>5분</b> 정도가 소요됩니다. 응답 내용은 연구 목적으로만 사용되며, 모든 결과는 <b>익명</b>으로 처리됩니다. 개인을 식별할 수 있는 정보는 수집하지 않습니다. 설문 참여는 자발적으로 이루어지며, 원하지 않을 경우 언제든지 응답을 중단할 수 있습니다.
+    </div>
+    <p>귀하의 응답은 버스정류장 정보 디자인 개선 방향을 도출하는 데 중요한 자료로 활용됩니다. 참여해 주셔서 감사합니다.</p>
+    <button class="btn primary full start" onclick="go(1)">설문 시작하기 &rarr;</button>
+    <div class="reslink"><button onclick="openRes()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>연구자용 · 수집 데이터 보기</button></div>
+  </section>
+
+  <!-- ===== STEP 1 : DEMOGRAPHICS ===== -->
+  <section class="card" data-step="1" style="display:none">
+    <div class="sectitle"><span class="ix">01</span><span class="nm">기본 정보</span></div>
+
+    <div class="q" data-q="q1">
+      <div class="qhead"><span class="qno">Q1</span><span class="qtext">귀하의 성별은 무엇입니까?</span></div>
+      <div class="opts" data-single></div>
+    </div>
+
+    <div class="q" data-q="q2">
+      <div class="qhead"><span class="qno">Q2</span><span class="qtext">귀하의 연령대는 어떻게 되십니까?</span></div>
+      <div class="opts grid2" data-single></div>
+    </div>
+    <div class="err" id="err1"></div>
+  </section>
+
+  <!-- ===== STEP 2 : USAGE ===== -->
+  <section class="card" data-step="2" style="display:none">
+    <div class="sectitle"><span class="ix">02</span><span class="nm">버스 이용 행태</span></div>
+
+    <div class="q" data-q="q3">
+      <div class="qhead"><span class="qno">Q3</span><span class="qtext">평소 일주일에 몇 회 정도 버스를 이용하십니까?</span></div>
+      <div class="qhint">왕복 이용 시 2회로 계산해 주세요.</div>
+      <div class="opts" data-single></div>
+    </div>
+
+    <div class="q" data-q="q4">
+      <div class="qhead"><span class="qno">Q4</span><span class="qtext">주로 어떤 방식으로 버스를 이용하십니까?</span></div>
+      <div class="opts" data-single></div>
+    </div>
+
+    <div class="q" data-q="q5">
+      <div class="qhead"><span class="qno">Q5</span><span class="qtext">주로 어느 시간대에 버스를 이용하십니까?</span></div>
+      <div class="qhint">해당하는 시간대를 모두 선택해 주세요.</div>
+      <div class="opts grid2" data-multi></div>
+    </div>
+
+    <div class="q" data-q="q6">
+      <div class="qhead"><span class="qno">Q6</span><span class="qtext">주로 어떤 목적으로 버스를 이용하십니까?</span></div>
+      <div class="qhint">복수 선택 가능</div>
+      <div class="opts grid2" data-multi></div>
+    </div>
+
+    <div class="q" data-q="q7">
+      <div class="qhead"><span class="qno">Q7</span><span class="qtext">버스 정보 앱을 얼마나 자주 이용하십니까?</span></div>
+      <div class="opts" data-single></div>
+    </div>
+    <div class="err" id="err2"></div>
+  </section>
+
+  <!-- ===== STEP 3 : INFO EXPERIENCE ===== -->
+  <section class="card" data-step="3" style="display:none">
+    <div class="sectitle"><span class="ix">03</span><span class="nm">정보 이용 경험</span></div>
+
+    <div class="q" data-q="q8">
+      <div class="qhead"><span class="qno">Q8</span><span class="qtext">버스를 기다릴 때 <u>가장 자주</u> 확인하는 정보는 무엇입니까?</span></div>
+      <div class="opts" data-single></div>
+    </div>
+
+    <div class="q" data-q="q9">
+      <div class="qhead"><span class="qno">Q9</span><span class="qtext">버스를 기다릴 때 <u>중요하다고 생각하는 정보 5개</u>를 선택해 주세요.</span></div>
+      <div class="counter" id="q9counter">0 / 5 선택됨</div>
+      <div class="opts" data-multi data-max="5"></div>
+    </div>
+
+    <div class="q" data-q="q10">
+      <div class="qhead"><span class="qno">Q10</span><span class="qtext">선택한 5개 정보를 <u>중요한 순서</u>대로 정렬해 주세요.</span></div>
+      <div class="qhint">화살표로 순서를 조정하세요. 1순위가 가장 중요합니다.</div>
+      <div class="rank" id="rankList"></div>
+    </div>
+    <div class="err" id="err3"></div>
+  </section>
+
+  <!-- ===== STEP 4 : PERCEPTION (OPEN) ===== -->
+  <section class="card" data-step="4" style="display:none">
+    <div class="sectitle"><span class="ix">04</span><span class="nm">전광판(BID)에 대한 인식</span></div>
+    <div class="qhint" style="margin:8px 0 0 0">아래 문항은 자유롭게, 생각나는 만큼만 적어주시면 됩니다 (선택 응답).</div>
+
+    <div class="q" data-q="q11">
+      <div class="qhead"><span class="qno">Q11</span><span class="qtext">BID에서 <u>불필요</u>하다고 생각하는 정보가 있다면?</span></div>
+      <textarea class="txt" data-open maxlength="600" placeholder="예) ____ 정보는 굳이 필요 없다고 느꼈습니다…"></textarea>
+      <div class="charcount"><span>0</span>/600</div>
+    </div>
+
+    <div class="q" data-q="q12">
+      <div class="qhead"><span class="qno">Q12</span><span class="qtext">BID에서 <u>개선</u>되어야 한다고 생각하는 점이 있다면?</span></div>
+      <textarea class="txt" data-open maxlength="600" placeholder="예) 글자가 더 컸으면, 도착시간이 더 정확했으면…"></textarea>
+      <div class="charcount"><span>0</span>/600</div>
+    </div>
+
+    <div class="q" data-q="q13">
+      <div class="qhead"><span class="qno">Q13</span><span class="qtext">BID를 이용하며 <u>불편</u>했던 경험이 있다면?</span></div>
+      <textarea class="txt" data-open maxlength="600" placeholder="자유롭게 적어주세요…"></textarea>
+      <div class="charcount"><span>0</span>/600</div>
+    </div>
+
+    <div class="q" data-q="q14">
+      <div class="qhead"><span class="qno">Q14</span><span class="qtext">BID가 <u>앱보다 더 유용</u>하다고 느낀 상황이 있다면?</span></div>
+      <textarea class="txt" data-open maxlength="600" placeholder="예) 폰 배터리가 없을 때, 짐이 많을 때…"></textarea>
+      <div class="charcount"><span>0</span>/600</div>
+    </div>
+    <div class="err" id="err4"></div>
+  </section>
+
+  <!-- ===== STEP 5 : DONE ===== -->
+  <section class="card done" data-step="5" style="display:none">
+    <div class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2>설문이 완료되었습니다</h2>
+    <p>참여해 주셔서 진심으로 감사합니다. 귀하의 응답은 버스정류장 전광판 정보 구성과 시각적 우선순위 개선 방향을 분석하는 데 소중하게 활용됩니다.</p>
+    <div class="reslink"><button onclick="openRes()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>연구자용 · 수집 데이터 보기</button></div>
+  </section>
+
+  <!-- nav -->
+  <div class="nav" id="nav" style="display:none">
+    <button class="btn ghost" id="prevBtn" onclick="prev()">&larr; 이전</button>
+    <button class="btn primary" id="nextBtn" onclick="next()">다음 &rarr;</button>
+  </div>
+</div>
+
+<!-- ===== researcher modal ===== -->
+<div class="modal" id="resModal">
+  <div class="sheet">
+    <h3>수집 데이터</h3>
+    <div class="sub">연구자 전용 화면입니다. 응답은 이 설문의 공유 저장소에 익명으로 누적됩니다.</div>
+    <div id="resBody"></div>
+    <div class="flag" id="resFlag" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- option data ---------------- */
+const O = {
+  q1:[['m','남성','Male'],['f','여성','Female'],['o','기타','Other'],['na','응답하고 싶지 않음','Prefer not to answer']],
+  q2:[['10','10대','Teens'],['20','20대','20s'],['30','30대','30s'],['40','40대','40s'],['50','50대','50s'],['60','60대','60s'],['70','70대 이상','70 or older']],
+  q3:[['none','이용하지 않음','Do not use'],['lt1m','월 1회 미만','< once a month'],['1-2','주 1–2회','1–2 / week'],['3-5','주 3–5회','3–5 / week'],['6-9','주 6–9회','6–9 / week'],['10-13','주 10–13회','10–13 / week'],['14+','주 14회 이상','14+ / week']],
+  q4:[['bus','버스만 이용','Bus only'],['bb','버스–버스 환승','Bus-to-bus'],['bs','버스–지하철 환승','Bus-to-subway'],['dep','상황에 따라 다름','It depends'],['other','기타','Other']],
+  q5:[['__g','오전  06:00–09:59'],['06','06:00–06:59',''],['07','07:00–07:59',''],['08','08:00–08:59',''],['09','09:00–09:59',''],['__g','오후  16:00–19:59'],['16','16:00–16:59',''],['17','17:00–17:59',''],['18','18:00–18:59',''],['19','19:00–19:59',''],['other','그 외 시간대','Other']],
+  q6:[['commute','출퇴근','Commuting (work)'],['school','등하교','Commuting (school)'],['leisure','여가','Leisure'],['errand','개인적인 용무','Personal errands'],['home','귀가','Returning home'],['shop','쇼핑','Shopping'],['public','병원·공공기관 방문','Hospital / public'],['other','기타','Other']],
+  q7:[['always','항상 이용','Always'],['often','자주 이용','Often'],['sometimes','가끔 이용','Sometimes'],['rarely','거의 이용 안 함','Rarely'],['never','전혀 이용 안 함','Never']],
+};
+// shared info items for Q8 / Q9 / Q10
+const INFO = [
+  ['route','버스 번호','Bus route number'],
+  ['eta','도착 예정 시간','Estimated arrival time'],
+  ['soon','곧 도착 여부','Arriving soon'],
+  ['crowd','혼잡도','Crowding level'],
+  ['lowfloor','저상버스 여부','Low-floor bus'],
+  ['disruption','운행 중단·지연·우회 정보','Suspension / delay / detour'],
+  ['weather','날씨·미세먼지 정보','Weather & fine dust'],
+  ['time','현재 시각','Current time'],
+  ['stopinfo','버스정류장 정보','Bus stop information'],
+  ['other','기타','Other'],
+];
+O.q8 = INFO; O.q9 = INFO;
+
+const INFO_MAP = {}; INFO.forEach(i=>INFO_MAP[i[0]]=i);
+
+/* ---------------- state ---------------- */
+const S = {
+  q1:'',q2:'',q3:'',q4:'',q4_other:'',
+  q5:[],q5_other:'',q6:[],q6_other:'',q7:'',
+  q8:'',q8_other:'',q9:[],q9_other:'',q10:[],
+  q11:'',q12:'',q13:'',q14:''
+};
+const STEP_NAMES = ['','기본 정보','이용 행태','정보 경험','전광판 인식'];
+
+/* ---------------- build option UI ---------------- */
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+
+function buildOpts(){
+  document.querySelectorAll('.q[data-q] .opts').forEach(box=>{
+    const q = box.closest('.q').dataset.q;
+    const single = box.hasAttribute('data-single');
+    const data = O[q]; if(!data) return;
+    data.forEach(([val,ko,en])=>{
+      if(val==='__g'){ const g=document.createElement('div'); g.className='optgroup'; g.textContent=ko; box.appendChild(g); return; }
+      const b=document.createElement('button');
+      b.className='opt'; b.type='button';
+      b.dataset.shape = single?'radio':'check';
+      b.dataset.q=q; b.dataset.val=val;
+      b.innerHTML='<span class="mark">'+CHECK+'</span><span>'+ko+'</span>';
+      b.onclick=()=>toggle(q,val,single,b);
+      box.appendChild(b);
+      if(val==='other'){
+        const ob=document.createElement('div'); ob.className='otherbox';
+        ob.dataset.for=q;
+        ob.innerHTML='<input class="txt" placeholder="직접 입력" oninput="S.'+q+'_other=this.value">';
+        box.appendChild(ob);
+      }
+    });
+  });
+}
+
+function toggle(q,val,single,el){
+  if(single){
+    S[q]=val;
+    el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+    el.classList.add('sel');
+  } else {
+    const arr=S[q]; const i=arr.indexOf(val);
+    const max=parseInt(el.parentElement.dataset.max||'0',10);
+    if(i>=0){ arr.splice(i,1); el.classList.remove('sel'); }
+    else {
+      if(max && arr.length>=max){ flashCounter(); return; }
+      arr.push(val); el.classList.add('sel');
+    }
+    if(q==='q9'){ updateQ9(); renderRank(); }
+  }
+  // other box
+  const ob=el.parentElement.querySelector('.otherbox[data-for="'+q+'"]');
+  if(ob && val==='other'){
+    const on = single ? (S[q]==='other') : S[q].includes('other');
+    ob.classList.toggle('on',on);
+  }
+}
+
+let flashT;
+function flashCounter(){
+  const c=document.getElementById('q9counter');
+  c.style.color='var(--warn)';
+  clearTimeout(flashT); flashT=setTimeout(()=>updateQ9(),600);
+}
+function updateQ9(){
+  const c=document.getElementById('q9counter'); const n=S.q9.length;
+  c.textContent=n+' / 5 선택됨';
+  c.classList.toggle('full',n===5); c.style.color='';
+}
+
+/* ---------------- ranking (Q10) ---------------- */
+function renderRank(){
+  const box=document.getElementById('rankList');
+  // keep only selected, preserve existing order, append new ones
+  S.q10 = S.q10.filter(v=>S.q9.includes(v));
+  S.q9.forEach(v=>{ if(!S.q10.includes(v)) S.q10.push(v); });
+  box.innerHTML='';
+  if(S.q10.length===0){
+    box.innerHTML='<div class="empty">Q9에서 5개 정보를 먼저 선택하면 여기에 표시됩니다.</div>';
+    return;
+  }
+  S.q10.forEach((v,idx)=>{
+    const it=INFO_MAP[v]; const ko=(v==='other')?('기타'+(S.q9_other?' ('+S.q9_other+')':'')):it[1];
+    const row=document.createElement('div'); row.className='rankrow';
+    row.innerHTML='<div class="num">'+(idx+1)+'</div>'+
+      '<div class="lbl">'+ko+'</div>'+
+      '<div class="arrows">'+
+        '<button '+(idx===0?'disabled':'')+' onclick="moveRank('+idx+',-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg></button>'+
+        '<button '+(idx===S.q10.length-1?'disabled':'')+' onclick="moveRank('+idx+',1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>'+
+      '</div>';
+    box.appendChild(row);
+  });
+}
+function moveRank(i,d){
+  const j=i+d; if(j<0||j>=S.q10.length)return;
+  [S.q10[i],S.q10[j]]=[S.q10[j],S.q10[i]]; renderRank();
+}
+
+/* ---------------- open text ---------------- */
+function bindOpen(){
+  document.querySelectorAll('textarea[data-open]').forEach(t=>{
+    const q=t.closest('.q').dataset.q;
+    const cc=t.parentElement.querySelector('.charcount span');
+    t.oninput=()=>{ S[q]=t.value; cc.textContent=t.value.length; };
+  });
+}
+
+/* ---------------- navigation ---------------- */
+let step=0;
+function showStep(n){
+  document.querySelectorAll('section[data-step]').forEach(s=>{
+    s.style.display = (+s.dataset.step===n)?'block':'none';
+  });
+  const showChrome = n>=1 && n<=4;
+  document.getElementById('progressArea').style.display = showChrome?'block':'none';
+  document.getElementById('nav').style.display = showChrome?'flex':'none';
+  if(showChrome){
+    document.getElementById('stepName').textContent='섹션 0'+n+' · '+STEP_NAMES[n];
+    document.getElementById('stepCount').textContent=n+' / 4';
+    const p=document.getElementById('progress'); p.innerHTML='';
+    for(let i=1;i<=4;i++){const seg=document.createElement('div');seg.className='seg'+(i<n?' done':i===n?' cur':'');p.appendChild(seg);}
+    document.getElementById('prevBtn').style.visibility = n===1?'hidden':'visible';
+    document.getElementById('nextBtn').textContent = n===4?'제출하기 ✓':'다음 →';
+  }
+  if(n===3) renderRank();
+  window.scrollTo({top:0,behavior:'smooth'});
+  step=n;
+}
+function go(n){ showStep(n); }
+function prev(){ if(step>1) showStep(step-1); }
+function next(){
+  const e=document.getElementById('err'+step);
+  const msg=validate(step);
+  if(msg){ e.textContent=msg; e.classList.add('on'); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); return; }
+  if(e){ e.classList.remove('on'); }
+  if(step===4){ submit(); } else { showStep(step+1); }
+}
+function validate(s){
+  if(s===1){ if(!S.q1) return '⚠ Q1 성별을 선택해 주세요.'; if(!S.q2) return '⚠ Q2 연령대를 선택해 주세요.'; }
+  if(s===2){
+    if(!S.q3) return '⚠ Q3 버스 이용 빈도를 선택해 주세요.';
+    if(!S.q4) return '⚠ Q4 이용 방식을 선택해 주세요.';
+    if(S.q4==='other' && !S.q4_other.trim()) return '⚠ Q4 기타 내용을 입력해 주세요.';
+    if(S.q5.length===0) return '⚠ Q5 이용 시간대를 하나 이상 선택해 주세요.';
+    if(S.q6.length===0) return '⚠ Q6 이용 목적을 하나 이상 선택해 주세요.';
+    if(!S.q7) return '⚠ Q7 앱 이용 빈도를 선택해 주세요.';
+  }
+  if(s===3){
+    if(!S.q8) return '⚠ Q8 가장 자주 확인하는 정보를 선택해 주세요.';
+    if(S.q8==='other' && !S.q8_other.trim()) return '⚠ Q8 기타 내용을 입력해 주세요.';
+    if(S.q9.length!==5) return '⚠ Q9 중요 정보를 정확히 5개 선택해 주세요. (현재 '+S.q9.length+'개)';
+    if(S.q9.includes('other') && !S.q9_other.trim()) return '⚠ Q9 기타 내용을 입력해 주세요.';
+  }
+  return '';
+}
+
+/* ---------------- save to shared storage ---------------- */
+async function submit(){
+  document.getElementById('nextBtn').disabled=true;
+  const id = Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);
+  const rec = JSON.parse(JSON.stringify(S));
+  rec._id=id; rec._ts=new Date().toISOString();
+  try{
+    await window.storage.set('bid_resp:'+id, JSON.stringify(rec), true);
+  }catch(err){
+    console.error(err);
+    alert('저장 중 문제가 발생했습니다. 네트워크를 확인 후 다시 시도해 주세요.');
+    document.getElementById('nextBtn').disabled=false; return;
+  }
+  showStep(5);
+  document.getElementById('nextBtn').disabled=false;
+}
+
+/* ---------------- researcher panel ---------------- */
+const PASS='bid2025';   // change this passphrase before sharing
+function openRes(){
+  const p=prompt('연구자 암호를 입력하세요:');
+  if(p===null) return;
+  if(p!==PASS){ alert('암호가 올바르지 않습니다.'); return; }
+  document.getElementById('resModal').classList.add('on');
+  loadRes();
+}
+function closeRes(){ document.getElementById('resModal').classList.remove('on'); }
+/* 숨겨진 연구자 접근: Ctrl/⌘ + Shift + R */
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='R'||e.key==='r')){ e.preventDefault(); openRes(); }
+});
+document.getElementById('resModal').addEventListener('click',e=>{ if(e.target.id==='resModal') closeRes(); });
+
+const FIELDS=['_id','_ts','q1','q2','q3','q4','q4_other','q5','q5_other','q6','q6_other','q7','q8','q8_other','q9','q9_other','q10_rank1','q10_rank2','q10_rank3','q10_rank4','q10_rank5','q11','q12','q13','q14'];
+let RECORDS=[];
+
+async function loadRes(){
+  const body=document.getElementById('resBody');
+  body.innerHTML='<div class="sub">불러오는 중…</div>';
+  RECORDS=[];
+  try{
+    const list=await window.storage.list('bid_resp:',true);
+    const keys=(list&&list.keys)?list.keys:[];
+    for(const k of keys){
+      try{ const r=await window.storage.get(k,true); if(r&&r.value) RECORDS.push(JSON.parse(r.value)); }catch(e){}
+    }
+  }catch(e){ body.innerHTML='<div class="sub" style="color:var(--warn)">저장소를 불러올 수 없습니다.</div>'; return; }
+  RECORDS.sort((a,b)=>(a._ts<b._ts?1:-1));
+  renderRes();
+}
+
+function flat(r){
+  const o={};
+  FIELDS.forEach(f=>o[f]='');
+  Object.keys(r).forEach(k=>{
+    if(k==='q10'){ (r.q10||[]).forEach((v,i)=>{ o['q10_rank'+(i+1)]=v; }); }
+    else if(Array.isArray(r[k])) o[k]=r[k].join('; ');
+    else o[k]=r[k];
+  });
+  return o;
+}
+
+function renderRes(){
+  const body=document.getElementById('resBody');
+  const flag=document.getElementById('resFlag');
+  let head='<div class="statline">'+
+    '<div class="stat"><div class="n">'+RECORDS.length+'</div><div class="k">총 응답</div></div>'+
+    '<div class="stat"><div class="n">'+RECORDS.filter(r=>r.q11||r.q12||r.q13||r.q14).length+'</div><div class="k">서술형 포함</div></div>'+
+    '</div>';
+  let table='';
+  if(RECORDS.length){
+    const cols=FIELDS;
+    table='<div class="tablewrap"><table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
+    RECORDS.slice(0,40).forEach(r=>{ const f=flat(r); table+='<tr>'+cols.map(c=>'<td>'+String(f[c]??'').slice(0,40)+'</td>').join('')+'</tr>'; });
+    table+='</tbody></table></div>'+(RECORDS.length>40?'<div class="sub">미리보기는 최근 40건만 표시됩니다. 전체는 내보내기를 이용하세요.</div>':'');
+  } else {
+    table='<div class="sub">아직 수집된 응답이 없습니다.</div>';
+  }
+  const btns='<div class="resbtns">'+
+    '<button class="btn primary" onclick="exportCSV()">CSV 내보내기 ↓</button>'+
+    '<button class="btn ghost" onclick="exportJSON()">JSON 내보내기 ↓</button>'+
+    '<button class="btn ghost" onclick="loadRes()">새로고침 ↻</button>'+
+    '<button class="btn ghost danger" onclick="wipe()">전체 삭제</button>'+
+    '<button class="btn ghost" onclick="closeRes()">닫기</button>'+
+    '</div>';
+  body.innerHTML=head+table+btns;
+  flag.style.display='block';
+  flag.innerHTML='⚠ <b>프로토타입 안내</b> — 응답은 이 아티팩트의 <b>공유 저장소</b>에 누적되며, 암호는 클라이언트 측 단순 차단(보안 X)입니다. 실제 논문용 정식 수집·IRB 데이터 보관에는 별도 배포 또는 검증된 플랫폼 사용을 권장합니다.';
+}
+
+function dl(name,content,type){
+  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
+}
+function csvCell(v){ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function exportCSV(){
+  const rows=[FIELDS.join(',')];
+  RECORDS.forEach(r=>{ const f=flat(r); rows.push(FIELDS.map(c=>csvCell(f[c])).join(',')); });
+  dl('bid_survey_'+new Date().toISOString().slice(0,10)+'.csv','\uFEFF'+rows.join('\n'),'text/csv;charset=utf-8');
+}
+function exportJSON(){ dl('bid_survey_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(RECORDS,null,2),'application/json'); }
+
+async function wipe(){
+  if(!confirm('모든 응답을 영구 삭제합니다. 계속할까요?'))return;
+  try{
+    const list=await window.storage.list('bid_resp:',true);
+    for(const k of (list.keys||[])){ try{await window.storage.delete(k,true);}catch(e){} }
+  }catch(e){}
+  loadRes();
+}
+
+/* ---------------- init ---------------- */
+buildOpts(); bindOpen(); updateQ9(); showStep(0);
+</script>
+</body>
+</html>
