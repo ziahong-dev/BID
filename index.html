@@ -87,51 +87,14 @@ body{
 .steptag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);
   letter-spacing:.04em;margin-bottom:9px;display:flex;justify-content:space-between;align-items:baseline}
 .steptag .nm{color:var(--ink-2);font-weight:600;letter-spacing:.02em}
-
-/*
-  Progress bar fix
-  - 4px 높이를 progress / segment / fill에 모두 명시
-  - 기존 absolute + inset:0 방식 제거
-  - GitHub Pages에서도 div.seg.done::after가 4px로 보이도록 고정
-*/
-.progress{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:6px;
-  width:100%;
-  height:4px;
-  min-height:4px;
-  max-height:4px;
-  overflow:hidden;
-  align-items:start;
-}
-.progress .seg{
-  display:block;
-  width:100%;
-  height:4px;
-  min-height:4px;
-  max-height:4px;
-  line-height:0;
-  font-size:0;
-  border-radius:4px;
-  background:var(--bg-2);
-  overflow:hidden;
-  position:relative;
-}
-.progress .seg::after{
-  content:"";
-  display:block;
-  width:0%;
-  height:4px;
-  min-height:4px;
-  max-height:4px;
-  border-radius:4px;
-  background:var(--accent);
-  transform:none;
-  transition:width .45s cubic-bezier(.4,0,.1,1);
-}
-.progress .seg.done::after{width:100%}
-.progress .seg.cur::after{width:50%}
+.progress{display:flex;gap:6px;align-items:stretch}
+.progress .seg{flex:1 1 0;height:4px;min-height:4px;max-height:4px;border-radius:4px;background:var(--bg-2);
+  overflow:hidden;position:relative}
+.progress .seg::after{content:"";position:absolute;inset:0;background:var(--accent);
+  border-radius:4px;transform:scaleX(0);transform-origin:left;
+  transition:transform .45s cubic-bezier(.4,0,.1,1)}
+.progress .seg.done::after{transform:scaleX(1)}
+.progress .seg.cur::after{transform:scaleX(.5)}
 
 /* ---------- cards / questions ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -254,12 +217,12 @@ textarea.txt{min-height:92px;line-height:1.6}
 .intro .start{margin-top:22px}
 
 /* thank you */
-.done{text-align:center;padding:34px 12px}
-.done .ic{width:66px;height:66px;border-radius:50%;background:var(--ok-soft);color:var(--ok);
+section.done{text-align:center;padding:34px 12px}
+section.done .ic{width:66px;height:66px;border-radius:50%;background:var(--ok-soft);color:var(--ok);
   display:grid;place-items:center;margin:0 auto 20px}
-.done h2{font-size:21px;margin-bottom:10px;letter-spacing:-.02em}
-.done p{color:var(--ink-2);font-size:14.5px;margin-bottom:7px;max-width:46ch;margin-left:auto;margin-right:auto}
-.done .en{color:var(--ink-3);font-size:12.5px}
+section.done h2{font-size:21px;margin-bottom:10px;letter-spacing:-.02em}
+section.done p{color:var(--ink-2);font-size:14.5px;margin-bottom:7px;max-width:46ch;margin-left:auto;margin-right:auto}
+section.done .en{color:var(--ink-3);font-size:12.5px}
 
 /* researcher link + modal */
 .reslink{display:none}  /* 연구자용 버튼 숨김 — 단축키(Ctrl/⌘+Shift+R)로 접근 */
@@ -302,8 +265,9 @@ th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monosp
 <body>
 <div class="wrap">
   <div class="board">
-    <div class="tag"><span class="dot"></span>연세대학교 시각·통합 디자인 연구실</div>
-    <h1>버스 정보 안내 단말기 내 디스플레이 (BID) <br> 정보 구성에 대한 이용자 인식 조사</h1>
+    <div class="tag"><span class="dot"></span>연세대학교 커뮤니케이션·통합 디자인 연구실</div>
+    <h1>버스 정보 안내 단말기 내 디스플레이 (BID) 
+정보 구성에 대한 이용자 인식 조사</h1>
   </div>
 
   <!-- progress -->
@@ -317,9 +281,7 @@ th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monosp
     <p>안녕하세요. <b>연세대학교 커뮤니케이션/통합 디자인 연구실</b>입니다.</p>
     <p>먼저, 귀한 시간 내어 설문에 참여해 주셔서 감사합니다.</p>
     <p>본 설문은 버스정류장에 위치한 <b>버스정보디스플레이(BID)</b> 내 표시되는 정보가 이용자에게 어떻게 인식되고 활용되는지를 파악하기 위한 학술 연구 목적으로 진행됩니다.</p>
-    <div class="defs">
-      본 설문에서 말하는 <b>버스정보디스플레이(BID)</b>는 버스정류장에 설치되어 버스 번호, 도착 예정 시간, 곧 도착 여부, 혼잡도, 운행 지연 정보 등을 제공하는 실시간 디지털 정보 표시 장치를 의미합니다.
-    </div>
+    <div class="defs">본 설문에서 말하는 버스정보디스플레이(BID)는 버스정류장에 설치되어 버스 번호, 도착 예정 시간, 곧 도착 여부, 혼잡도, 운행 지연 정보 등을 제공하는 실시간 디지털 정보 표시 장치를 의미합니다.</div>
     <div class="meta">
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>약 5분 소요</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5z"/></svg>익명 처리</span>
@@ -370,14 +332,8 @@ th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monosp
       <div class="opts grid2" data-multi></div>
     </div>
 
-    <div class="q" data-q="q6">
-      <div class="qhead"><span class="qno">Q6</span><span class="qtext">주로 어떤 목적으로 버스를 이용하십니까?</span></div>
-      <div class="qhint">복수 선택 가능</div>
-      <div class="opts grid2" data-multi></div>
-    </div>
-
     <div class="q" data-q="q7">
-      <div class="qhead"><span class="qno">Q7</span><span class="qtext">버스 정보 앱을 얼마나 자주 이용하십니까?</span></div>
+      <div class="qhead"><span class="qno">Q6</span><span class="qtext">버스 정보 앱을 얼마나 자주 이용하십니까?</span></div>
       <div class="opts" data-single></div>
     </div>
     <div class="err" id="err2"></div>
@@ -388,18 +344,18 @@ th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monosp
     <div class="sectitle"><span class="ix">03</span><span class="nm">정보 이용 경험</span></div>
 
     <div class="q" data-q="q8">
-      <div class="qhead"><span class="qno">Q8</span><span class="qtext">버스를 기다릴 때 <u>가장 자주</u> 확인하는 정보는 무엇입니까?</span></div>
+      <div class="qhead"><span class="qno">Q7</span><span class="qtext">버스를 기다릴 때 <u>가장 자주</u> 확인하는 정보는 무엇입니까?</span></div>
       <div class="opts" data-single></div>
     </div>
 
     <div class="q" data-q="q9">
-      <div class="qhead"><span class="qno">Q9</span><span class="qtext">버스를 기다릴 때 <u>중요하다고 생각하는 정보 5개</u>를 선택해 주세요.</span></div>
+      <div class="qhead"><span class="qno">Q8</span><span class="qtext">버스를 기다릴 때 <u>중요하다고 생각하는 정보 5개</u>를 선택해 주세요.</span></div>
       <div class="counter" id="q9counter">0 / 5 선택됨</div>
       <div class="opts" data-multi data-max="5"></div>
     </div>
 
     <div class="q" data-q="q10">
-      <div class="qhead"><span class="qno">Q10</span><span class="qtext">선택한 5개 정보를 <u>중요한 순서</u>대로 정렬해 주세요.</span></div>
+      <div class="qhead"><span class="qno">Q9</span><span class="qtext">선택한 5개 정보를 <u>중요한 순서</u>대로 정렬해 주세요.</span></div>
       <div class="qhint">화살표로 순서를 조정하세요. 1순위가 가장 중요합니다.</div>
       <div class="rank" id="rankList"></div>
     </div>
@@ -412,25 +368,25 @@ th{background:var(--bg);position:sticky;top:0;font-family:'IBM Plex Mono',monosp
     <div class="qhint" style="margin:8px 0 0 0">아래 문항은 자유롭게, 생각나는 만큼만 적어주시면 됩니다 (선택 응답).</div>
 
     <div class="q" data-q="q11">
-      <div class="qhead"><span class="qno">Q11</span><span class="qtext">BID에서 <u>불필요</u>하다고 생각하는 정보가 있다면?</span></div>
+      <div class="qhead"><span class="qno">Q10</span><span class="qtext">BID에서 <u>불필요</u>하다고 생각하는 정보가 있다면?</span></div>
       <textarea class="txt" data-open maxlength="600" placeholder="예) ____ 정보는 굳이 필요 없다고 느꼈습니다…"></textarea>
       <div class="charcount"><span>0</span>/600</div>
     </div>
 
     <div class="q" data-q="q12">
-      <div class="qhead"><span class="qno">Q12</span><span class="qtext">BID에서 <u>개선</u>되어야 한다고 생각하는 점이 있다면?</span></div>
+      <div class="qhead"><span class="qno">Q11</span><span class="qtext">BID에서 <u>개선</u>되어야 한다고 생각하는 점이 있다면?</span></div>
       <textarea class="txt" data-open maxlength="600" placeholder="예) 글자가 더 컸으면, 도착시간이 더 정확했으면…"></textarea>
       <div class="charcount"><span>0</span>/600</div>
     </div>
 
     <div class="q" data-q="q13">
-      <div class="qhead"><span class="qno">Q13</span><span class="qtext">BID를 이용하며 <u>불편</u>했던 경험이 있다면?</span></div>
+      <div class="qhead"><span class="qno">Q12</span><span class="qtext">BID를 이용하며 <u>불편</u>했던 경험이 있다면?</span></div>
       <textarea class="txt" data-open maxlength="600" placeholder="자유롭게 적어주세요…"></textarea>
       <div class="charcount"><span>0</span>/600</div>
     </div>
 
     <div class="q" data-q="q14">
-      <div class="qhead"><span class="qno">Q14</span><span class="qtext">BID가 <u>앱보다 더 유용</u>하다고 느낀 상황이 있다면?</span></div>
+      <div class="qhead"><span class="qno">Q13</span><span class="qtext">BID가 <u>앱보다 더 유용</u>하다고 느낀 상황이 있다면?</span></div>
       <textarea class="txt" data-open maxlength="600" placeholder="예) 폰 배터리가 없을 때, 짐이 많을 때…"></textarea>
       <div class="charcount"><span>0</span>/600</div>
     </div>
@@ -469,8 +425,15 @@ const O = {
   q2:[['10','10대','Teens'],['20','20대','20s'],['30','30대','30s'],['40','40대','40s'],['50','50대','50s'],['60','60대','60s'],['70','70대 이상','70 or older']],
   q3:[['none','이용하지 않음','Do not use'],['lt1m','월 1회 미만','< once a month'],['1-2','주 1–2회','1–2 / week'],['3-5','주 3–5회','3–5 / week'],['6-9','주 6–9회','6–9 / week'],['10-13','주 10–13회','10–13 / week'],['14+','주 14회 이상','14+ / week']],
   q4:[['bus','버스만 이용','Bus only'],['bb','버스–버스 환승','Bus-to-bus'],['bs','버스–지하철 환승','Bus-to-subway'],['dep','상황에 따라 다름','It depends'],['other','기타','Other']],
-  q5:[['__g','오전  06:00–09:59'],['06','06:00–06:59',''],['07','07:00–07:59',''],['08','08:00–08:59',''],['09','09:00–09:59',''],['__g','오후  16:00–19:59'],['16','16:00–16:59',''],['17','17:00–17:59',''],['18','18:00–18:59',''],['19','19:00–19:59',''],['other','그 외 시간대','Other']],
-  q6:[['commute','출퇴근','Commuting (work)'],['school','등하교','Commuting (school)'],['leisure','여가','Leisure'],['errand','개인적인 용무','Personal errands'],['home','귀가','Returning home'],['shop','쇼핑','Shopping'],['public','병원·공공기관 방문','Hospital / public'],['other','기타','Other']],
+  q5:[
+    ['__g','오전  04:00–11:59'],
+    ['04','04:00–04:59',''],['05','05:00–05:59',''],['06','06:00–06:59',''],['07','07:00–07:59',''],['08','08:00–08:59',''],['09','09:00–09:59',''],['10','10:00–10:59',''],['11','11:00–11:59',''],
+    ['__g','오후  12:00–23:59'],
+    ['12','12:00–12:59',''],['13','13:00–13:59',''],['14','14:00–14:59',''],['15','15:00–15:59',''],['16','16:00–16:59',''],['17','17:00–17:59',''],
+    ['18','18:00–18:59',''],['19','19:00–19:59',''],['20','20:00–20:59',''],['21','21:00–21:59',''],['22','22:00–22:59',''],['23','23:00–23:59',''],
+    ['__g','심야  00:00–03:59'],
+    ['00','00:00–00:59',''],['01','01:00–01:59',''],['02','02:00–02:59',''],['03','03:00–03:59','']
+  ],
   q7:[['always','항상 이용','Always'],['often','자주 이용','Often'],['sometimes','가끔 이용','Sometimes'],['rarely','거의 이용 안 함','Rarely'],['never','전혀 이용 안 함','Never']],
 };
 // shared info items for Q8 / Q9 / Q10
@@ -493,7 +456,7 @@ const INFO_MAP = {}; INFO.forEach(i=>INFO_MAP[i[0]]=i);
 /* ---------------- state ---------------- */
 const S = {
   q1:'',q2:'',q3:'',q4:'',q4_other:'',
-  q5:[],q5_other:'',q6:[],q6_other:'',q7:'',
+  q5:[],q5_other:'',q7:'',
   q8:'',q8_other:'',q9:[],q9_other:'',q10:[],
   q11:'',q12:'',q13:'',q14:''
 };
@@ -519,7 +482,7 @@ function buildOpts(){
       if(val==='other'){
         const ob=document.createElement('div'); ob.className='otherbox';
         ob.dataset.for=q;
-        ob.innerHTML='<input class="txt" placeholder="직접 입력" oninput="S.'+q+'_other=this.value">';
+        ob.innerHTML='<input class="txt" placeholder="직접 입력 (필수)" oninput="S.'+q+'_other=this.value;this.style.borderColor=&#39;&#39;">';
         box.appendChild(ob);
       }
     });
@@ -569,7 +532,7 @@ function renderRank(){
   S.q9.forEach(v=>{ if(!S.q10.includes(v)) S.q10.push(v); });
   box.innerHTML='';
   if(S.q10.length===0){
-    box.innerHTML='<div class="empty">Q9에서 5개 정보를 먼저 선택하면 여기에 표시됩니다.</div>';
+    box.innerHTML='<div class="empty">Q8에서 5개 정보를 먼저 선택하면 여기에 표시됩니다.</div>';
     return;
   }
   S.q10.forEach((v,idx)=>{
@@ -624,7 +587,14 @@ function prev(){ if(step>1) showStep(step-1); }
 function next(){
   const e=document.getElementById('err'+step);
   const msg=validate(step);
-  if(msg){ e.textContent=msg; e.classList.add('on'); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); return; }
+  if(msg){
+    e.textContent=msg; e.classList.add('on');
+    if(msg.indexOf('기타')>=0){
+      const inp=document.querySelector('section[data-step="'+step+'"] .otherbox.on input');
+      if(inp){ inp.style.borderColor='var(--warn)'; inp.focus(); return; }
+    }
+    window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); return;
+  }
   if(e){ e.classList.remove('on'); }
   if(step===4){ submit(); } else { showStep(step+1); }
 }
@@ -635,46 +605,32 @@ function validate(s){
     if(!S.q4) return '⚠ Q4 이용 방식을 선택해 주세요.';
     if(S.q4==='other' && !S.q4_other.trim()) return '⚠ Q4 기타 내용을 입력해 주세요.';
     if(S.q5.length===0) return '⚠ Q5 이용 시간대를 하나 이상 선택해 주세요.';
-    if(S.q6.length===0) return '⚠ Q6 이용 목적을 하나 이상 선택해 주세요.';
-    if(!S.q7) return '⚠ Q7 앱 이용 빈도를 선택해 주세요.';
+    if(!S.q7) return '⚠ Q6 앱 이용 빈도를 선택해 주세요.';
   }
   if(s===3){
-    if(!S.q8) return '⚠ Q8 가장 자주 확인하는 정보를 선택해 주세요.';
-    if(S.q8==='other' && !S.q8_other.trim()) return '⚠ Q8 기타 내용을 입력해 주세요.';
-    if(S.q9.length!==5) return '⚠ Q9 중요 정보를 정확히 5개 선택해 주세요. (현재 '+S.q9.length+'개)';
-    if(S.q9.includes('other') && !S.q9_other.trim()) return '⚠ Q9 기타 내용을 입력해 주세요.';
+    if(!S.q8) return '⚠ Q7 가장 자주 확인하는 정보를 선택해 주세요.';
+    if(S.q8==='other' && !S.q8_other.trim()) return '⚠ Q7 기타 내용을 입력해 주세요.';
+    if(S.q9.length!==5) return '⚠ Q8 중요 정보를 정확히 5개 선택해 주세요. (현재 '+S.q9.length+'개)';
+    if(S.q9.includes('other') && !S.q9_other.trim()) return '⚠ Q8 기타 내용을 입력해 주세요.';
   }
   return '';
 }
 
 /* ---------------- save to shared storage ---------------- */
 async function submit(){
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.disabled = true;
-
-  const id = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+  document.getElementById('nextBtn').disabled=true;
+  const id = Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);
   const rec = JSON.parse(JSON.stringify(S));
-
-  rec._id = id;
-  rec._ts = new Date().toISOString();
-
+  rec._id=id; rec._ts=new Date().toISOString();
   try{
-    await fetch('https://script.google.com/macros/s/AKfycbyRiP6nLZ54Frl-pTGdyma8x9OW2cFoPrV_o5HGksHTBoKfdSZYcf9cYigj_TeD3xc/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(rec)
-    });
-
-    showStep(5);
+    await window.storage.set('bid_resp:'+id, JSON.stringify(rec), true);
   }catch(err){
-    console.error('Google Apps Script 저장 실패:', err);
+    console.error(err);
     alert('저장 중 문제가 발생했습니다. 네트워크를 확인 후 다시 시도해 주세요.');
-  }finally{
-    nextBtn.disabled = false;
+    document.getElementById('nextBtn').disabled=false; return;
   }
+  showStep(5);
+  document.getElementById('nextBtn').disabled=false;
 }
 
 /* ---------------- researcher panel ---------------- */
@@ -693,7 +649,7 @@ document.addEventListener('keydown',e=>{
 });
 document.getElementById('resModal').addEventListener('click',e=>{ if(e.target.id==='resModal') closeRes(); });
 
-const FIELDS=['_id','_ts','q1','q2','q3','q4','q4_other','q5','q5_other','q6','q6_other','q7','q8','q8_other','q9','q9_other','q10_rank1','q10_rank2','q10_rank3','q10_rank4','q10_rank5','q11','q12','q13','q14'];
+const FIELDS=['_id','_ts','q1','q2','q3','q4','q4_other','q5','q5_other','q7','q8','q8_other','q9','q9_other','q10_rank1','q10_rank2','q10_rank3','q10_rank4','q10_rank5','q11','q12','q13','q14'];
 let RECORDS=[];
 
 async function loadRes(){
@@ -776,3 +732,6 @@ buildOpts(); bindOpen(); updateQ9(); showStep(0);
 </script>
 </body>
 </html>
+
+<style id="__om-edit-overrides">
+</style>
