@@ -622,7 +622,6 @@ async function submit(){
   rec._ts = new Date().toISOString();
 
   try{
-    // Google Apps Script Web App으로 설문 응답 전송
     await fetch('https://script.google.com/macros/s/AKfycbyRiP6nLZ54Frl-pTGdyma8x9OW2cFoPrV_o5HGksHTBoKfdSZYcf9cYigj_TeD3xc/exec', {
       method: 'POST',
       mode: 'no-cors',
@@ -632,24 +631,13 @@ async function submit(){
       body: JSON.stringify(rec)
     });
 
-    // 기존 ChatGPT 아티팩트 공유 저장소가 있는 환경에서는 백업 저장
-    // 일반 웹 서버/로컬 HTML에서는 window.storage가 없을 수 있으므로 필수 저장 로직에서 제외
-    if (window.storage && typeof window.storage.set === 'function') {
-      try {
-        await window.storage.set('bid_resp:' + id, JSON.stringify(rec), true);
-      } catch (storageErr) {
-        console.warn('Local artifact storage backup failed:', storageErr);
-      }
-    }
+    showStep(5);
 
   }catch(err){
-    console.error(err);
+    console.error('Google Sheet 저장 실패:', err);
     alert('저장 중 문제가 발생했습니다. 네트워크를 확인 후 다시 시도해 주세요.');
-    nextBtn.disabled = false;
-    return;
   }
 
-  showStep(5);
   nextBtn.disabled = false;
 }
 
