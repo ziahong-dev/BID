@@ -83,46 +83,55 @@ body{
   font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-align:right;line-height:1.7}
 
 /* ---------- progress ---------- */
-.progress{
-  display:flex;
-  gap:6px;
-  height:4px;
-  align-items:flex-start;
-}
+.progress-wrap{margin-bottom:24px}
+.steptag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);
+  letter-spacing:.04em;margin-bottom:9px;display:flex;justify-content:space-between;align-items:baseline}
+.steptag .nm{color:var(--ink-2);font-weight:600;letter-spacing:.02em}
 
+/*
+  Progress bar fix
+  - 4px 높이를 progress / segment / fill에 모두 명시
+  - 기존 absolute + inset:0 방식 제거
+  - GitHub Pages에서도 div.seg.done::after가 4px로 보이도록 고정
+*/
+.progress{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  width:100%;
+  height:4px;
+  min-height:4px;
+  max-height:4px;
+  overflow:hidden;
+  align-items:start;
+}
 .progress .seg{
-  flex:1;
-  height:4px !important;
-  min-height:4px !important;
-  max-height:4px !important;
+  display:block;
+  width:100%;
+  height:4px;
+  min-height:4px;
+  max-height:4px;
+  line-height:0;
+  font-size:0;
   border-radius:4px;
   background:var(--bg-2);
   overflow:hidden;
   position:relative;
 }
-
 .progress .seg::after{
   content:"";
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:auto;
-  width:100%;
-  height:4px !important;
-  background:var(--accent);
+  display:block;
+  width:0%;
+  height:4px;
+  min-height:4px;
+  max-height:4px;
   border-radius:4px;
-  transform:scaleX(0);
-  transform-origin:left;
-  transition:transform .45s cubic-bezier(.4,0,.1,1);
+  background:var(--accent);
+  transform:none;
+  transition:width .45s cubic-bezier(.4,0,.1,1);
 }
-
-.progress .seg.done::after{
-  transform:scaleX(1);
-}
-
-.progress .seg.cur::after{
-  transform:scaleX(.5);
-}
+.progress .seg.done::after{width:100%}
+.progress .seg.cur::after{width:50%}
 
 /* ---------- cards / questions ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -660,13 +669,12 @@ async function submit(){
     });
 
     showStep(5);
-
   }catch(err){
-    console.error('Google Sheet 저장 실패:', err);
+    console.error('Google Apps Script 저장 실패:', err);
     alert('저장 중 문제가 발생했습니다. 네트워크를 확인 후 다시 시도해 주세요.');
+  }finally{
+    nextBtn.disabled = false;
   }
-
-  nextBtn.disabled = false;
 }
 
 /* ---------------- researcher panel ---------------- */
